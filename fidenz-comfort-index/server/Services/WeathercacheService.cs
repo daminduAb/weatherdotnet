@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using FidenzComfortIndex.Models;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -14,19 +15,14 @@ namespace FidenzComfortIndex.Services
         CacheStatusResult GetStatus(int cityId);
     }
 
-    /// <summary>
-    /// Wraps IMemoryCache with two namespaces (raw OWM responses, processed comfort results)
-    /// so the processed cache can be invalidated independently if the formula changes,
-    /// and exposes a way to inspect HIT/MISS + expiry without populating the cache
-    /// (important for the /api/debug/cache endpoint — checking status shouldn't count as a hit).
-    /// </summary>
     public class WeatherCacheService : IWeatherCacheService
     {
         private readonly IMemoryCache _cache;
         private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(5);
 
-        // Track cached-at timestamps separately since IMemoryCache doesn't expose them.
-        private readonly Dictionary<int, DateTimeOffset> _rawCachedAt = new();
+        // ConcurrentDictionary: SetRaw is called from parallel tasks in GetRankedCitiesAsync,
+        // so this needs to be safe for concurrent writes.
+        private readonly ConcurrentDictionary<int, DateTimeOffset> _rawCachedAt = new();
 
         public WeatherCacheService(IMemoryCache cache)
         {
@@ -44,7 +40,7 @@ namespace FidenzComfortIndex.Services
         public void SetRaw(int cityId, WeatherApiResponse weather)
         {
             _cache.Set(RawKey(cityId), weather, CacheDuration);
-            _rawCachedAt[cityId] = DateTimeOffset.UtcNow;
+            _rawCachedAt[cityId] = DateTimeOffset.UtcNow; // now thread-safe
         }
 
         public bool TryGetProcessed(int cityId, out CityComfortResult? result)
