@@ -1,0 +1,88 @@
+<div 
+  [class.dark]="isDarkMode"
+  class="min-h-screen transition-colors duration-500
+         bg-gradient-to-br from-indigo-100 via-sky-50 to-purple-100
+         dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-800
+         text-gray-900 dark:text-zinc-100 p-4 md:p-8"
+>
+
+  <header class="flex flex-wrap gap-3 items-center mb-8 backdrop-blur-xl bg-white/40 dark:bg-white/5 border border-white/60 dark:border-white/10 rounded-2xl p-4 shadow-lg">
+    <h1 class="basis-full text-2xl font-bold mb-2 tracking-tight bg-linear-to-r from-indigo-600 to-purple-600 dark:from-zinc-400 dark:to-zinc-100 bg-clip-text text-transparent">
+      Comfort Index Dashboard
+    </h1>
+
+    <button
+      (click)="logout()"
+      class="px-4 py-2 rounded-full bg-red-500/90 text-white text-sm font-semibold hover:bg-red-600 shadow-sm transition"
+    >
+      Log Out
+    </button>
+
+    <button
+      (click)="toggleDarkMode()"
+      class="px-4 py-2 rounded-full border border-white/60 dark:border-white/10 bg-white/50 dark:bg-white/5 backdrop-blur-md text-sm font-medium hover:bg-white/80 dark:hover:bg-white/10 transition"
+    >
+      {{ isDarkMode ? '☀️ Light' : '🌙 Dark' }}
+    </button>
+
+    <input
+      class="flex-1 min-w-[200px] px-4 py-2 rounded-full border border-white/60 dark:border-white/10
+             bg-white/60 dark:bg-white/5 backdrop-blur-md text-gray-900 dark:text-zinc-100
+             placeholder-gray-500 dark:placeholder-zinc-500
+             focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
+      type="text"
+      placeholder="Filter by city name..."
+      [(ngModel)]="filterText"
+    />
+
+    <select
+      class="flex-1 min-w-[200px] px-4 py-2 rounded-full border border-white/60 dark:border-white/10
+             bg-white/60 dark:bg-white/5 backdrop-blur-md text-gray-900 dark:text-zinc-100
+             focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
+      [(ngModel)]="sortKey"
+    >
+      <option value="rank" class="text-gray-900">Sort: Rank</option>
+      <option value="comfortScore" class="text-gray-900">Sort: Comfort Score</option>
+      <option value="temperatureCelsius" class="text-gray-900">Sort: Temperature</option>
+      <option value="cityName" class="text-gray-900">Sort: City Name</option>
+    </select>
+  </header>
+
+  <p *ngIf="loading" class="text-gray-500 dark:text-zinc-400 text-center py-8 animate-pulse">Loading weather data...</p>
+  <p *ngIf="error" class="text-red-600 dark:text-red-400 text-center py-8">{{ error }}</p>
+
+  <div
+    class="grid gap-5"
+    style="grid-template-columns: repeat(auto-fill, minmax(270px, 1fr))"
+    *ngIf="!loading && !error"
+  >
+    <div
+      class="group bg-white/50 dark:bg-white/5 backdrop-blur-xl border border-white/60 dark:border-white/10
+             rounded-2xl p-5 shadow-md
+             hover:shadow-xl hover:bg-white/70 dark:hover:bg-white/[0.08]
+             hover:-translate-y-1 transition-all duration-300"
+      *ngFor="let city of filteredCities"
+    >
+      <div class="flex justify-between items-center">
+        <h2 class="text-base font-semibold text-gray-900 dark:text-zinc-100">{{ city.cityName }}, {{ city.country }}</h2>
+        <span class="bg-indigo-600/90 dark:bg-zinc-600/90 text-white text-xs px-2.5 py-1 rounded-full font-medium shadow-sm">#{{ city.rank }}</span>
+      </div>
+
+      <p class="text-gray-500 dark:text-zinc-400 capitalize my-1 text-sm">{{ city.weatherDescription }}</p>
+      <p class="text-3xl font-bold my-2 tracking-tight text-gray-900 dark:text-white">{{ city.temperatureCelsius }}°C</p>
+
+      <div
+        class="inline-block font-semibold px-3 py-1 rounded-full my-2 text-sm backdrop-blur-sm"
+        [ngClass]="comfortClass(city.comfortScore)"
+      >
+        Comfort: {{ city.comfortScore }} / 100
+      </div>
+
+      <ul class="list-none p-0 m-0 mt-3 pt-3 border-t border-white/40 dark:border-white/10 text-sm text-gray-500 dark:text-zinc-400 space-y-1">
+        <li class="flex justify-between"><span>💧 Humidity</span><span>{{ city.humidity }}%</span></li>
+        <li class="flex justify-between"><span>💨 Wind</span><span>{{ city.windSpeed }} m/s</span></li>
+        <li class="flex justify-between"><span>☁️ Cloudiness</span><span>{{ city.cloudiness }}%</span></li>
+      </ul>
+    </div>
+  </div>
+</div>
