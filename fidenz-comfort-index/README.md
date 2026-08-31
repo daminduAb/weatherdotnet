@@ -88,7 +88,7 @@ City IDs come from OpenWeatherMap's public city list, searchable at openweatherm
 6. **User Management → Users → Create User** to add the whitelisted test account:
    - Email: `careers@fidenz.com`
    - Password: `Pass#fidenz`
-   - (Password Policy on the connection must allow this — set it to "Fair" or lower, not "Good"/"Excellent", which require 15+ characters.)
+   - (Password Policy on the connection must allow this — set it to "Fair" or lower, not "Good"/"Excellent", which require 11+ characters.)
 
 ---
 
